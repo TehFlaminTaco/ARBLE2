@@ -1183,7 +1183,7 @@ function _lcm(a, b)
     return (a*b)/_gcd(a,b)
 end
 
-function lcm(e)
+function lcm(e, b)
     if type(e) == 'number' then
         return _lcm(e, b)
     end
