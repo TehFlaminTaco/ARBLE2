@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.53.0/min/vs/loader.min.js" integrity="sha512-ZG31AN9z/CQD1YDDAK4RUAvogwbJHv6bHrumrnMLzdCrVu4HeAqrUX7Jsal/cbUwXGfaMUNmQU04tQ8XXl5Znw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="./script.mjs" type="module" defer></script>
+    <link href="./style.css" rel="stylesheet"/>
+    <title>ARBLE2</title>
+</head>
+<body>
+    <header>
+        <h1>ARBLE2</h1>
+        <div id="ai-badge">
+            <span class="ai-icon">✨</span>
+            <div class="ai-tooltip">
+                UI design assisted by Claude (Anthropic).<br>
+                Layout, colour palette, and typography<br>
+                were generated and refined with AI help.
+            </div>
+        </div>
+        <div id="header-right">
+            <button id="btn-codegolf" title="Generate Code-Golf post">Code-Golf</button>
+            <button id="btn-cmc" title="Generate CMC post">CMC</button>
+        </div>
+    </header>
+    <div id="content">
+        <div id="editor"><div class="label">Editor <span id="byte-count">15 bytes</span></div><div class="body" id="editor-body"></div></div>
+        <div id="input"><div class="label">Input</div><div class="body"></div></div>
+        <div id="mutated"><div class="label">Mutated</div><div class="body"></div></div>
+        <div id="output">
+            <div class="label">
+                <span class="tab active" data-target="output-body">Output</span>
+                <span class="tab" data-target="error-body">Error</span>
+            </div>
+            <div class="body" id="output-body"></div>
+            <div class="body" id="error-body" hidden></div>
+        </div>
+    </div>
+</body>
+</html>
