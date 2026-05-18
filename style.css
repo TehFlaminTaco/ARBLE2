@@ -224,3 +224,7 @@ header h1 {
 #ai-badge:hover .ai-tooltip {
     display: block;
 }
+
+a {
+    text-decoration: none;
+}
