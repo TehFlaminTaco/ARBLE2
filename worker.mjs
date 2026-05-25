@@ -22,25 +22,44 @@ await Promise.all(modules.map(async c=>{
 }));
 let error = '';
 let txt = '';
+let postedTxt = 0;
+let postedError = 0;
+let nextPost = 0;
+function TryPost(){
+    if(+new Date() <= nextPost) return;
+    nextPost = (+new Date())+1000;
+    if(txt.length > 60_000) txt = txt.substring(0,60_000) + "[Message trimmed past 60kb]";
+    if(error.length > 60_000) error = error.substring(0,60_000) + "[Message trimmed past 60kb]";
+    if(postedTxt < txt.length){
+        console.log(`${postedTxt}: ${txt.substring(postedTxt)}`);
+        postMessage({type: 'append', txt: txt.substring(postedTxt)});
+        postedTxt = txt.length;
+    }
+    if(postedError < error.length){
+        postMessage({type: 'appendError', txt: error.substring(postedError)});
+        postedError = error.length;
+    }
+}
+
 lua.global.set('write', (...args)=>{
     const str = args.map(c=>`${c}`).join();
     txt += str;
-    postMessage({type: 'append', txt: str})
+    TryPost();
 })
 lua.global.set('print', (...args)=>{
     const str = args.map(c=>`${c}`).join('\t')+'\n';
     txt += str;
-    postMessage({type: 'append', txt: str})
+    TryPost();
 })
 lua.global.set('writeerror', (...args)=>{
     const str = args.map(c=>`${c}`).join();
     error += str;
-    postMessage({type: 'appendError', txt: str})
+    TryPost();
 })
 lua.global.set('printerror', (...args)=>{
     const str = args.map(c=>`${c}`).join('\t')+'\n';
     error += str;
-    postMessage({type: 'appendError', txt: str})
+    TryPost();
 })
 lua.global.set('showmutated', (txt)=>{
     postMessage({
@@ -58,12 +77,17 @@ onmessage = async (ev)=>{
     try {
         await showruncode(code);
     }catch(e){
+        postedError = error.length;
+        postedTxt = txt.length;
         console.error(e);
         postMessage({
             type: 'result',
             error, txt
         })
+        return;
     }
+    postedError = error.length;
+    postedTxt = txt.length;
     postMessage({
         type: 'result',
         error, txt
