@@ -72,7 +72,10 @@ async function RunCode(){
                 break;
             }
             case 'result':{
-
+                txt = event.data.txt;
+                err = event.data.error;
+                editors.get('output').setValue(txt);
+                editors.get('error').setValue(err);
                 break;
             }
             default: {
@@ -99,6 +102,28 @@ const decompress = async str => {
     return new Response(stream).text();
 };
 
+async function onUpdate(){ 
+    const code = editors.get('editor').getValue();
+    const input = editors.get('input').getValue();
+    document.getElementById("byte-count").innerText = `${code.length} bytes`
+    // Check if compressed or decompressed is shorter.
+    let c = await compress(code);
+    let u = encodeURI(code);
+    let ci = await compress(input);
+    let ui = encodeURI(input);
+    const state = {};
+    if(u.length < c.length)
+        state.u = code;
+    else
+        state.c = c;
+    if(ui.length < ci.length)
+        state.a = input;
+    else
+        state.b = ci;
+    history.replaceState(null, '', '?' + new URLSearchParams(state));
+    RunCode();
+}
+
 require(["vs/editor/editor.main"], async function () {
     monaco.editor.defineTheme("arble", {
         base: "vs-dark",
@@ -123,7 +148,7 @@ require(["vs/editor/editor.main"], async function () {
     }else if(url.searchParams.has('u')){
         code = url.searchParams.get('u');
     }
-    let input = 'some text input';
+    let input = '';
     if(url.searchParams.has('b')){
         input = await decompress(url.searchParams.get('b'));
     }else if(url.searchParams.has('a')){
@@ -140,27 +165,8 @@ require(["vs/editor/editor.main"], async function () {
     edit("error", "", "text", "#error-body")
         .updateOptions({readOnly: true})
 
-    editors.get('editor').onDidChangeModelContent(async (event)=>{
-        const code = editors.get('editor').getValue();
-        const input = editors.get('input').getValue();
-        document.getElementById("byte-count").innerText = `${code.length} bytes`
-        // Check if compressed or decompressed is shorter.
-        let c = await compress(code);
-        let u = encodeURI(code);
-        let ci = await compress(input);
-        let ui = encodeURI(input);
-        const state = {};
-        if(u.length < c.length)
-            state.u = code;
-        else
-            state.c = c;
-        if(ui.length < ci.length)
-            state.a = input;
-        else
-            state.b = ci;
-        history.replaceState(null, '', '?' + new URLSearchParams(state));
-        RunCode();
-    })
+    editors.get('editor').onDidChangeModelContent(async (event)=>{onUpdate();})
+    editors.get('input').onDidChangeModelContent(async (event)=>{onUpdate();})
 
     RunCode();
 });
