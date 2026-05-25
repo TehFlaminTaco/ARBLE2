@@ -2,6 +2,7 @@
 -- These will dynamically check for a last statement and return it
 
 local oldLoad = load
+_G._LOAD = oldLoad
 function load(str)
     str = mutate(str)
     -- Try just prepending a 'return ', if that works, return the function
@@ -36,7 +37,7 @@ function run(str, ...)
     local func, err = load(str)
     if func then
         local outv = {func(...)}
-        if #outv == 1 and (isEq(outv[1]) or type(outv[1]) == "function") then
+        if #outv == 1 and type(outv[1]) == "function" then
             outv = {outv[1](...)}
         end
         return table.unpack(outv)
