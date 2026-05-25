@@ -58,9 +58,33 @@ end
 
 function _G.showruncode(code)
     local status, result = xpcall(function()
-        showmutated(mutate(code))
+        -- Try and parse inputs, and if so, include those.
+        local preCode = ""
+        local inputs = {}
+        local b, e = pcall(function()
+            local inp = run("return {%s}"%readall())
+            if inp and #inp > 0 then
+                preCode = 'local '
+                local first = true
+                for i=1, math.min(26,#inp) do
+                    if not first then
+                        preCode = preCode .. ', '
+                    end
+                    first = false
+                    preCode = preCode .. string.char(96 + i)
+                end
+                preCode = preCode .. ' = ' .. readall() .. '\n'
+                inputs = inp
+            end
+        end)
+        -- Try and add implicit return.
+        if (_LOAD(mutate(preCode .. 'return ' .. code))) then
+            code = 'return ' .. code
+        end
+
+        showmutated(mutate(preCode .. code))
         local start = os.clock()
-        local res = {run(code)}
+        local res = {run(preCode .. code, table.unpack(inputs))}
         local endt = os.clock()
         -- For everything but the last, print, for the last, write
         if #res == 0 then
